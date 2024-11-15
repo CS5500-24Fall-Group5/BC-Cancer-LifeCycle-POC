@@ -1,0 +1,25 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model DonorData {
+  firstName                String
+  lastName                 String
+  address                  String
+  city                     String
+  totalDonations           Decimal  @default(0.0)
+  lastGiftAmount           Decimal  @default(0.0)
+  lastGiftDate             DateTime?
+  lifecycleStage           String
+  comment                  String?
+  communicationRestrictions String?
+
+  @@id([firstName, lastName, address]) // Composite primary key
+}
+
+
