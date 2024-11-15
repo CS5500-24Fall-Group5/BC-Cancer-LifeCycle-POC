@@ -106,7 +106,7 @@ export default function Home() {
 
   return (
     <div>
-      <DonorTable data={donorData} />
+      <DonorTable />
     </div>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   flexRender,
   getCoreRowModel,
@@ -222,14 +222,53 @@ const columns = [
   },
 ];
 
-export default function DonorTable({ data }) {
+export default function DonorTable() {
   const [sorting, setSorting] = useState([]);
   const [columnFilters, setColumnFilters] = useState([]);
   const [columnVisibility, setColumnVisibility] = useState({});
   const [rowSelection, setRowSelection] = useState({});
 
+  const [donorData, setDonorData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [lifecycleStage, setLifecycleStage] = useState("");
+
+  // Fetch data based on lifecycleStage filter
+  useEffect(() => {
+    const fetchDonorData = async () => {
+      setLoading(true);
+      setError(null);
+
+      try {
+        let url = "http://localhost:5000/donors"; // Adjust the API URL as needed
+        if (lifecycleStage) {
+          url += `?lifecycleStage=${lifecycleStage}`;
+        }
+
+        const response = await fetch(url);
+        if (!response.ok) {
+          throw new Error("Failed to fetch donor data");
+        }
+        const data = await response.json();
+        setDonorData(data);
+      } catch (err) {
+        console.error("Error fetching donor data:", err);
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDonorData();
+  }, [lifecycleStage]); // Refetch data whenever lifecycleStage changes
+
+  // Handle lifecycle stage selection
+  const handleFilterChange = (event) => {
+    setLifecycleStage(event.target.value);
+  };
+
   const table = useReactTable({
-    data,
+    data:donorData,
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -267,6 +306,22 @@ export default function DonorTable({ data }) {
               className="h-8"
             />
           </div>
+          
+          {/* Filter by Lifecycle Stage */}
+          <label className="ml-4 flex items-center space-x-3">
+            <span>Filter by Lifecycle Stage:</span>
+            <select
+              value={lifecycleStage}
+              onChange={handleFilterChange}
+              className="h-8 p-1 border rounded ml-2"
+            >
+              <option value="">All</option>
+              <option value="New">New</option>
+              <option value="Active">Active</option>
+              <option value="At-Risk">At-Risk</option>
+              <option value="Lapsed">Lapsed</option>
+            </select>
+          </label>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" size="sm" className="ml-auto">
