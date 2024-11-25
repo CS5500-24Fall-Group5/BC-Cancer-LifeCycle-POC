@@ -76,14 +76,7 @@ export default function DonorTable({
           </Button>
         );
       },
-      filterFn: (row, columnId, filterValue) => {
-        const firstName = row.getValue("firstName").toLowerCase();
-        const lastName = row.getValue("lastName").toLowerCase();
-        const searchValue = filterValue.toLowerCase();
-        return (
-          firstName.includes(searchValue) || lastName.includes(searchValue)
-        );
-      },
+      filterFn: "nameFilter",
     },
     {
       accessorKey: "lastName",
@@ -346,12 +339,8 @@ export default function DonorTable({
     data,
     columns,
     onSortingChange: setSorting,
-    onColumnFiltersChange: (value) => {
-      setColumnFilters(value);
-      if (value.length > 0) {
-        const filterValue = value[0];
-        onFilterChange?.(filterValue.value);
-      }
+    onColumnFiltersChange: (filters) => {
+      setColumnFilters(filters);
     },
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
@@ -362,6 +351,16 @@ export default function DonorTable({
       sorting,
       columnFilters,
       columnVisibility,
+    },
+    filterFns: {
+      nameFilter: (row, columnId, filterValue) => {
+        const firstName = String(row.getValue("firstName")).toLowerCase();
+        const lastName = String(row.getValue("lastName")).toLowerCase();
+        const searchValue = String(filterValue).toLowerCase();
+        return (
+          firstName.includes(searchValue) || lastName.includes(searchValue)
+        );
+      },
     },
   });
 
@@ -390,7 +389,6 @@ export default function DonorTable({
               onChange={(event) => {
                 const value = event.target.value;
                 table.getColumn("firstName")?.setFilterValue(value);
-                table.getColumn("lastName")?.setFilterValue(value);
               }}
               className="h-8"
             />
