@@ -2,6 +2,7 @@ import localFont from "next/font/local";
 import "./globals.css";
 import { JetBrains_Mono } from "next/font/google";
 import { Fira_Code } from "next/font/google";
+import { Toaster } from "sonner";
 
 const jetBrainsMono = JetBrains_Mono({
   subsets: ["latin"],
@@ -23,7 +24,10 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className={`${jetBrainsMono.variable} antialiased`}>{children}</body>
+      <body className={`${jetBrainsMono.variable} antialiased`}>
+        {children}
+        <Toaster />
+      </body>
     </html>
   );
 }
