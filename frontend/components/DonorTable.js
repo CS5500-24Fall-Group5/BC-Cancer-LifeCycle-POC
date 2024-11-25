@@ -74,6 +74,7 @@ export default function DonorTable({
   const [sorting, setSorting] = useState([]);
   const [columnFilters, setColumnFilters] = useState([]);
   const [columnVisibility, setColumnVisibility] = useState({});
+  const [selectedLifecycleStage, setSelectedLifecycleStage] = useState("");
 
   const columns = [
     {
@@ -349,12 +350,12 @@ export default function DonorTable({
     {
       id: "actions",
       cell: ({ row }) => {
-        const donor = row.original; // 当前行的捐赠者信息
-        const [isOpen, setIsOpen] = useState(false); // Dialog 控制
+        const donor = row.original;
+        const [isOpen, setIsOpen] = useState(false);
         const [lifecycleStage, setLifecycleStage] = useState(
           donor.lifecycleStage
-        ); // 本地存储状态
-        const [isSaving, setIsSaving] = useState(false); // 保存按钮状态
+        );
+        const [isSaving, setIsSaving] = useState(false);
 
         return (
           <>
@@ -548,6 +549,29 @@ export default function DonorTable({
               className="h-8"
             />
           </div>
+          {/* Filter by Lifecycle Stage */}
+          {/* control the height of select */}
+          <div className="flex w-full max-w-sm items-center space-x-2 ml-5 font-bold">
+            <Select
+              value={selectedLifecycleStage}
+              onValueChange={(value) => {
+                setSelectedLifecycleStage(value);
+                onFilterChange(value === "ALL" ? "" : value); // Pass empty string to parent if ALL is selected
+              }}
+            >
+              <SelectTrigger className="w-full h-8">
+                <SelectValue placeholder="Filter by Lifecycle Stage" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ALL">All Stages</SelectItem>
+                <SelectItem value="NEW">NEW</SelectItem>
+                <SelectItem value="ACTIVE">ACTIVE</SelectItem>
+                <SelectItem value="AT_RISK">AT_RISK</SelectItem>
+                <SelectItem value="LAPSED">LAPSED</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" size="sm" className="ml-auto">
