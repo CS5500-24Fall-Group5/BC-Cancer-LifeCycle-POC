@@ -35,4 +35,23 @@ app.post("/:id/comments", async (c) => {
   return c.json(comment);
 });
 
+app.put("/:id/lifecycle-stage", async (c) => {
+  const id = c.req.param("id");
+  const { lifecycleStage } = await c.req.json();
+
+  const validStages = ["NEW", "ACTIVE", "AT_RISK", "LAPSED"];
+  if (!validStages.includes(lifecycleStage)) {
+    return c.json({ error: "Invalid lifecycle stage" }, 400);
+  }
+
+  try {
+    const updatedDonor = await donorService.updateLifecycleStage(id, lifecycleStage);
+    return c.json(updatedDonor);
+  } catch (error) {
+    console.error("Error updating lifecycle stage:", error);
+    return c.json({ error: "Failed to update lifecycle stage" }, 500);
+  }
+});
+
+
 export default app;

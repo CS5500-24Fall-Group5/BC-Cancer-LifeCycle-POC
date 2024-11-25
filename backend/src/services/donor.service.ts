@@ -121,4 +121,19 @@ export class DonorService {
       return false;
     }
   }
+
+  async updateLifecycleStage(donorId: string, lifecycleStage: LifecycleStage) {
+    const donor = await this.prisma.donor.findUnique({
+      where: { id: donorId },
+    });
+
+    if (!donor) {
+      throw new Error("Donor not found");
+    }
+
+    return this.prisma.donor.update({
+      where: { id: donorId },
+      data: { lifecycleStage, updatedAt: new Date() },
+    });
+  }
 }

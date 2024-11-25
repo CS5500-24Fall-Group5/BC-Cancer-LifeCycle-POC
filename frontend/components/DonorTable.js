@@ -309,27 +309,111 @@ export default function DonorTable({
     {
       id: "actions",
       cell: ({ row }) => {
-        const donor = row.original;
+        const donor = row.original; // 当前行的捐赠者信息
+        const [isOpen, setIsOpen] = useState(false); // Dialog 控制
+        const [lifecycleStage, setLifecycleStage] = useState(
+          donor.lifecycleStage
+        ); // 本地存储状态
+        const [isSaving, setIsSaving] = useState(false); // 保存按钮状态
+
         return (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="h-8 w-8 p-0">
-                <span className="sr-only">Open menu</span>
-                <MoreHorizontal className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Actions</DropdownMenuLabel>
-              <DropdownMenuItem
-                onClick={() => navigator.clipboard.writeText(donor.firstName)}
-              >
-                Copy name
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem>View details</DropdownMenuItem>
-              <DropdownMenuItem>View donation history</DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="h-8 w-8 p-0">
+                  <span className="sr-only">Open menu</span>
+                  <MoreHorizontal className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem
+                  onClick={() => {
+                    setIsOpen(true);
+                  }}
+                >
+                  View details
+                </DropdownMenuItem>
+                <DropdownMenuItem>View donation history</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            {/* Dialog for viewing and updating lifecycleStage */}
+            <Dialog open={isOpen} onOpenChange={setIsOpen}>
+              <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                  <DialogTitle>Donor Details</DialogTitle>
+                </DialogHeader>
+                <div className="grid gap-4 py-4">
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium">
+                      Name: {donor.firstName} {donor.lastName}
+                    </p>
+                    <p className="text-sm font-medium">City: {donor.city}</p>
+                    <p className="text-sm font-medium">
+                      Total Donations:{" "}
+                      {new Intl.NumberFormat("en-US", {
+                        style: "currency",
+                        currency: "USD",
+                      }).format(donor.totalDonations)}
+                    </p>
+                  </div>
+
+                  {/* Lifecycle Stage Selector */}
+                  <div className="grid gap-2">
+                    <h4 className="text-sm font-medium">Lifecycle Stage</h4>
+                    <select
+                      value={lifecycleStage}
+                      onChange={(e) => setLifecycleStage(e.target.value)}
+                      className="border p-2 rounded"
+                    >
+                      <option value="NEW">NEW</option>
+                      <option value="ACTIVE">ACTIVE</option>
+                      <option value="AT_RISK">AT_RISK</option>
+                      <option value="LAPSED">LAPSED</option>
+                    </select>
+                  </div>
+                </div>
+                <div className="flex justify-end gap-2 mt-4">
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setIsOpen(false);
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={async () => {
+                      setIsSaving(true);
+                      try {
+                        const response = await fetch(
+                          `http://localhost:3000/api/donors/${donor.id}/lifecycle-stage`,
+                          {
+                            method: "PUT",
+                            headers: {
+                              "Content-Type": "application/json",
+                            },
+                            body: JSON.stringify({ lifecycleStage }),
+                          }
+                        );
+                        if (!response.ok) {
+                          throw new Error("Failed to update lifecycle stage");
+                        }
+                        setIsOpen(false);
+                      } catch (error) {
+                        console.error("Error updating lifecycle stage:", error);
+                      } finally {
+                        setIsSaving(false);
+                      }
+                    }}
+                    disabled={isSaving}
+                  >
+                    {isSaving ? "Saving..." : "Save"}
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
+          </>
         );
       },
     },
