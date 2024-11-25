@@ -48,6 +48,13 @@ import {
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Plus } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export default function DonorTable({
   data,
@@ -339,7 +346,7 @@ export default function DonorTable({
 
             {/* Dialog for viewing and updating lifecycleStage */}
             <Dialog open={isOpen} onOpenChange={setIsOpen}>
-              <DialogContent className="sm:max-w-[425px]">
+              <DialogContent className="sm:max-w-[600px]">
                 <DialogHeader>
                   <DialogTitle>Donor Details</DialogTitle>
                 </DialogHeader>
@@ -348,7 +355,9 @@ export default function DonorTable({
                     <p className="text-sm font-medium">
                       Name: {donor.firstName} {donor.lastName}
                     </p>
-                    <p className="text-sm font-medium">City: {donor.city}</p>
+                    <p className="text-sm font-medium">
+                      City: {donor.city || "N/A"}
+                    </p>
                     <p className="text-sm font-medium">
                       Total Donations:{" "}
                       {new Intl.NumberFormat("en-US", {
@@ -356,21 +365,48 @@ export default function DonorTable({
                         currency: "USD",
                       }).format(donor.totalDonations)}
                     </p>
+                    <p className="text-sm font-medium">
+                      Last Gift Amount: ${donor.lastGiftAmount}
+                    </p>
+                    <p className="text-sm font-medium">
+                      Last Gift Date:{" "}
+                      {new Date(donor.lastGiftDate).toLocaleDateString()}
+                    </p>
+                    <p className="text-sm font-medium">
+                      Notes: {donor.notes || "No Notes Available"}
+                    </p>
+                    <p className="text-sm font-medium">
+                      Communication Restrictions:{" "}
+                      {donor.communicationRestrictions || "No Restrictions"}
+                    </p>
+                    <p className="text-sm font-medium">
+                      Primary Account: {donor.primaryAccount || "N/A"}
+                    </p>
+                    <p className="text-sm font-medium">
+                      Exclude Flag: {donor.excludeFlag || "N/A"}
+                    </p>
+                    <p className="text-sm font-medium">
+                      Deceased Flag: {donor.deceasedFlag || "N/A"}
+                    </p>
                   </div>
 
                   {/* Lifecycle Stage Selector */}
                   <div className="grid gap-2">
-                    <h4 className="text-sm font-medium">Lifecycle Stage</h4>
-                    <select
+                    <h4 className="text-sm font-bold">Lifecycle Stage</h4>
+                    <Select
                       value={lifecycleStage}
-                      onChange={(e) => setLifecycleStage(e.target.value)}
-                      className="border p-2 rounded"
+                      onValueChange={(value) => setLifecycleStage(value)}
                     >
-                      <option value="NEW">NEW</option>
-                      <option value="ACTIVE">ACTIVE</option>
-                      <option value="AT_RISK">AT_RISK</option>
-                      <option value="LAPSED">LAPSED</option>
-                    </select>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a stage" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="NEW">NEW</SelectItem>
+                        <SelectItem value="ACTIVE">ACTIVE</SelectItem>
+                        <SelectItem value="AT_RISK">AT_RISK</SelectItem>
+                        <SelectItem value="LAPSED">LAPSED</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
                 <div className="flex justify-end gap-2 mt-4">
@@ -403,6 +439,8 @@ export default function DonorTable({
                       } catch (error) {
                         console.error("Error updating lifecycle stage:", error);
                       } finally {
+                        // refresh the page
+                        onFilterChange();
                         setIsSaving(false);
                       }
                     }}
