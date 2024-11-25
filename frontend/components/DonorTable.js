@@ -55,6 +55,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { Info } from "lucide-react";
 
 export default function DonorTable({
   data,
@@ -199,8 +206,34 @@ export default function DonorTable({
             >
               {stage}
             </Badge>
-            {row.original.excludeFlag === "Yes" && " (Excluded)"}
-            {row.original.deceasedFlag === "Yes" && " (Deceased)"}
+
+            {/* Tooltip for Excluded */}
+            {row.original.excludeFlag === "Yes" && (
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger>
+                    <Info className="ml-1 h-4 w-4 text-red-600" />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Excluded</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            )}
+
+            {/* Tooltip for Deceased */}
+            {row.original.deceasedFlag === "Yes" && (
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger>
+                    <Info className="ml-1 h-4 w-4 text-gray-600" />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Deceased</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            )}
           </div>
         );
       },
@@ -243,7 +276,7 @@ export default function DonorTable({
                 onClick={() => setIsOpen(true)}
                 className="text-xs"
               >
-                Add comment
+                <span className="text-gray-500">Add Comment</span>
               </Button>
             )}
 

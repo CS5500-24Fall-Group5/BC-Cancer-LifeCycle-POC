@@ -35,7 +35,6 @@ export default function Home() {
       if (!response.ok) throw new Error("Failed to fetch donors");
 
       const result = await response.json();
-      console.log(result.data);
       setDonors(result.data);
       setPagination(result.pagination);
     } catch (error) {
