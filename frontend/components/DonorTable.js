@@ -530,6 +530,13 @@ export default function DonorTable({
     );
   }
 
+  const handleAction = () => {
+    console.log("Performing action for donors:", data);
+    alert(
+      `Action triggered for ${data.length} donors in the ${selectedLifecycleStage} stage.`
+    );
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -669,6 +676,18 @@ export default function DonorTable({
               Next
             </Button>
           </div>
+
+          {/* Action Button */}
+          {selectedLifecycleStage && (
+            <Button
+              variant="solid"
+              size="sm"
+              onClick={handleAction}
+              className="bg-blue-500 text-white"
+            >
+              Action on {data.length} Donors
+            </Button>
+          )}
         </div>
       </CardContent>
     </Card>
