@@ -1,22 +1,8 @@
 // src/services/sync.service.ts
+
 import { PrismaClient } from "@prisma/client";
 import { DonorService } from "./donor.service";
-
-interface FauxDonorResponse {
-  success: boolean;
-  message: string;
-  data: Array<{
-    first_name: string;
-    last_name: string;
-    city: string;
-    total_gifts_last_fiscal: number;
-    total_gifts_current_fiscal: number;
-    first_gift_amount: number;
-    first_gift_date: number;
-    last_gift_amount: number;
-    last_gift_date: number;
-  }>;
-}
+import { calculateLifecycleStage } from "../utils/lifecycle";
 
 export class SyncService {
   private readonly FAUX_API_URL =
@@ -28,41 +14,35 @@ export class SyncService {
   ) {}
 
   async syncDonors(params?: { batchSize?: number; totalLimit?: number }) {
-    const { batchSize = 10, totalLimit = 10 } = params || {};
+    const batchSize = params?.batchSize || 10;
+    const url = `${this.FAUX_API_URL}?limit=${batchSize}`;
 
     try {
-      const url = `${this.FAUX_API_URL}?limit=${batchSize}`;
       const response = await fetch(url);
-
-      if (!response.ok) {
-        throw new Error(`API responded with status: ${response.status}`);
-      }
-
-      const fauxData: FauxDonorResponse = await response.json();
-
-      if (!fauxData.success) {
-        throw new Error("Failed to fetch data from Faux API");
-      }
+      const { data: fauxDonors } = await response.json();
 
       const results = {
-        total: fauxData.data.length,
+        total: fauxDonors.length,
         processed: 0,
         created: 0,
         updated: 0,
         errors: 0,
       };
 
-      for (const fauxDonor of fauxData.data) {
+      for (const fauxDonor of fauxDonors) {
         try {
-          const existing = await this.prisma.donor.findFirst({
-            where: {
-              firstName: fauxDonor.first_name,
-              lastName: fauxDonor.last_name,
-              city: fauxDonor.city,
-            },
+          // Calculate lifecycle stage based on donor data
+          const lifecycleStage = calculateLifecycleStage({
+            excludeFlag: fauxDonor.exclude,
+            deceasedFlag: fauxDonor.deceased,
+            firstGiftDate: fauxDonor.first_gift_date,
+            lastGiftDate: fauxDonor.last_gift_date,
+            totalGiftsLastFiscal: fauxDonor.total_gifts_last_fiscal,
+            totalGiftsCurrentFiscal: fauxDonor.total_gifts_current_fiscal,
           });
 
-          await this.donorService.createOrUpdateDonor({
+          // Transform faux data to our schema
+          const donorData = {
             firstName: fauxDonor.first_name,
             lastName: fauxDonor.last_name,
             city: fauxDonor.city,
@@ -74,9 +54,79 @@ export class SyncService {
             firstGiftDate: new Date(fauxDonor.first_gift_date),
             totalGiftsLastFiscal: fauxDonor.total_gifts_last_fiscal,
             totalGiftsCurrentFiscal: fauxDonor.total_gifts_current_fiscal,
+            lifecycleStage,
+
+            // Store original faux data fields
+            excludeFlag: fauxDonor.exclude,
+            deceasedFlag: fauxDonor.deceased,
+            pmm: fauxDonor.pmm,
+            smm: fauxDonor.smm,
+            vmm: fauxDonor.vmm,
+            primaryAccount: fauxDonor.primary_account,
+            largestGiftAmount: fauxDonor.largest_gift_amount,
+            largestGiftAppeal: fauxDonor.largest_gift_appeal,
+            firstGiftAmount: fauxDonor.first_gift_amount,
+            lastGiftAppeal: fauxDonor.last_gift_appeal,
+            address1: fauxDonor.address_1,
+            address2: fauxDonor.address_2,
+            province: fauxDonor.province,
+            postalCode: fauxDonor.postal_code,
+            contactPhone: fauxDonor.contact_phone,
+            communicationRestrictions: fauxDonor.communication_restrictions,
+            snapshotSummary: fauxDonor.snapshot_summary,
+
+            // Add status notes
+            notes: `[System Generated] Lifecycle: ${lifecycleStage}${
+              fauxDonor.exclude === "Yes" ? " (Excluded)" : ""
+            }${
+              fauxDonor.deceased === "Yes" ? " (Deceased)" : ""
+            } - Auto-classified on ${new Date().toISOString()}`,
+          };
+
+          const existing = await this.prisma.donor.findFirst({
+            where: {
+              firstName: fauxDonor.first_name,
+              lastName: fauxDonor.last_name,
+              city: fauxDonor.city,
+            },
           });
 
-          existing ? results.updated++ : results.created++;
+          if (existing) {
+            // Update existing donor
+            const updatedDonor = await this.prisma.donor.update({
+              where: { id: existing.id },
+              data: donorData,
+            });
+
+            // Record lifecycle stage change if any
+            if (existing.lifecycleStage !== lifecycleStage) {
+              await this.prisma.donorAction.create({
+                data: {
+                  donorId: existing.id,
+                  previousStage: existing.lifecycleStage,
+                  newStage: lifecycleStage,
+                  actionType: "AUTO_UPDATE",
+                  note: `Status updated based on: ${
+                    fauxDonor.exclude === "Yes"
+                      ? "Donor excluded"
+                      : fauxDonor.deceased === "Yes"
+                      ? "Donor deceased"
+                      : "Donation patterns"
+                  }`,
+                  createdBy: "SYSTEM",
+                },
+              });
+            }
+
+            results.updated++;
+          } else {
+            // Create new donor
+            await this.prisma.donor.create({
+              data: donorData,
+            });
+            results.created++;
+          }
+
           results.processed++;
         } catch (error) {
           console.error("Error processing donor:", error);

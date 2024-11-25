@@ -21,16 +21,35 @@ model Donor {
   firstName      String
   lastName       String
   city           String?
-  totalDonations Float // Total donation amount
-  lastGiftAmount Float // Last gift amount
-  lastGiftDate   DateTime // Last gift date
+  totalDonations Float
+  lastGiftAmount Float
+  lastGiftDate   DateTime
   lifecycleStage LifecycleStage
-  notes          String? // Notes about the donor
+  notes          String?        @db.Text
 
   // Extended fields
-  firstGiftDate           DateTime? // First gift date
-  totalGiftsLastFiscal    Float? // Total gifts from last fiscal year
-  totalGiftsCurrentFiscal Float? // Total gifts from current fiscal year
+  firstGiftDate           DateTime?
+  totalGiftsLastFiscal    Float?
+  totalGiftsCurrentFiscal Float?
+
+  // Faux Data Fields for tracking
+  excludeFlag               String? // Yes/No
+  deceasedFlag              String? // Yes/No
+  pmm                       String?
+  smm                       String?
+  vmm                       String?
+  primaryAccount            String? @db.Text
+  largestGiftAmount         Float?
+  largestGiftAppeal         String?
+  firstGiftAmount           Float?
+  lastGiftAppeal            String?
+  address1                  String?
+  address2                  String?
+  province                  String?
+  postalCode                String?
+  contactPhone              String?
+  communicationRestrictions String? @db.Text
+  snapshotSummary           String? @db.Text
 
   // Relations
   comments Comment[]
@@ -41,6 +60,7 @@ model Donor {
   updatedAt DateTime @updatedAt
 
   @@index([lifecycleStage])
+  @@index([firstName, lastName, city])
 }
 
 model Comment {

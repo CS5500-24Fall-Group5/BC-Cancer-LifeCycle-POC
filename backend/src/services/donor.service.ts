@@ -11,12 +11,12 @@ export class DonorService {
     stage?: LifecycleStage;
     searchTerm?: string;
   }) {
-    // 确保参数都是数字且有合理的默认值
+    // Ensure parameters have valid defaults
     const page = Number(params?.page || 1);
     const limit = Number(params?.limit || 10);
     const skip = (page - 1) * limit;
 
-    // 基础查询配置
+    // Build query configuration
     const queryArgs: Prisma.DonorFindManyArgs = {
       take: limit,
       skip: skip,
@@ -25,7 +25,7 @@ export class DonorService {
       },
     };
 
-    // 只在需要时添加 where 条件
+    // Add filtering conditions if provided
     if (params?.stage || params?.searchTerm) {
       queryArgs.where = {};
 
@@ -43,7 +43,7 @@ export class DonorService {
     }
 
     try {
-      // 执行查询
+      // Execute queries
       const [donors, total] = await Promise.all([
         this.prisma.donor.findMany(queryArgs),
         this.prisma.donor.count({
@@ -51,8 +51,17 @@ export class DonorService {
         }),
       ]);
 
+      // Format dates for API response
+      const formattedDonors = donors.map((donor) => ({
+        ...donor,
+        lastGiftDate: donor.lastGiftDate.toISOString(),
+        firstGiftDate: donor.firstGiftDate?.toISOString(),
+        createdAt: donor.createdAt.toISOString(),
+        updatedAt: donor.updatedAt.toISOString(),
+      }));
+
       return {
-        data: donors,
+        data: formattedDonors,
         pagination: {
           total,
           page,
@@ -66,43 +75,22 @@ export class DonorService {
     }
   }
 
-  async createOrUpdateDonor(data: {
-    firstName: string;
-    lastName: string;
-    city?: string;
-    totalDonations: number;
-    lastGiftAmount: number;
-    lastGiftDate: Date;
-    firstGiftDate?: Date;
-    totalGiftsLastFiscal?: number;
-    totalGiftsCurrentFiscal?: number;
-  }) {
-    const existingDonor = await this.prisma.donor.findFirst({
-      where: {
-        firstName: data.firstName,
-        lastName: data.lastName,
-        city: data.city || undefined,
-      },
-    });
-
-    if (existingDonor) {
-      return this.prisma.donor.update({
-        where: { id: existingDonor.id },
-        data,
-      });
-    }
-
-    return this.prisma.donor.create({
-      data,
-    });
-  }
-
   async addComment(params: {
     donorId: string;
     content: string;
     createdBy: string;
   }) {
     const { donorId, content, createdBy } = params;
+
+    // Verify donor exists before adding comment
+    const donor = await this.prisma.donor.findUnique({
+      where: { id: donorId },
+    });
+
+    if (!donor) {
+      throw new Error("Donor not found");
+    }
+
     return this.prisma.comment.create({
       data: {
         donorId,
@@ -113,7 +101,12 @@ export class DonorService {
   }
 
   async checkInitialData() {
-    const count = await this.prisma.donor.count();
-    return count > 0;
+    try {
+      const count = await this.prisma.donor.count();
+      return count > 0;
+    } catch (error) {
+      console.error("Error checking initial data:", error);
+      return false;
+    }
   }
 }
