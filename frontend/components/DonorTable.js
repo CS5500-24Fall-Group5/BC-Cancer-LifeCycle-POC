@@ -76,6 +76,14 @@ export default function DonorTable({
           </Button>
         );
       },
+      filterFn: (row, columnId, filterValue) => {
+        const firstName = row.getValue("firstName").toLowerCase();
+        const lastName = row.getValue("lastName").toLowerCase();
+        const searchValue = filterValue.toLowerCase();
+        return (
+          firstName.includes(searchValue) || lastName.includes(searchValue)
+        );
+      },
     },
     {
       accessorKey: "lastName",
@@ -200,6 +208,7 @@ export default function DonorTable({
     {
       accessorKey: "comments",
       header: "Comments",
+      enableSorting: false,
       cell: function CommentCell({ row }) {
         const [isOpen, setIsOpen] = useState(false);
         const [newComment, setNewComment] = useState("");
@@ -337,7 +346,13 @@ export default function DonorTable({
     data,
     columns,
     onSortingChange: setSorting,
-    onColumnFiltersChange: setColumnFilters,
+    onColumnFiltersChange: (value) => {
+      setColumnFilters(value);
+      if (value.length > 0) {
+        const filterValue = value[0];
+        onFilterChange?.(filterValue.value);
+      }
+    },
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
@@ -370,13 +385,12 @@ export default function DonorTable({
           <div className="flex w-full max-w-sm items-center space-x-2">
             <Search className="h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Filter by Lifecycle Stage..."
-              value={table.getColumn("lifecycleStage")?.getFilterValue() ?? ""}
+              placeholder="Filter by Name..."
+              value={table.getColumn("firstName")?.getFilterValue() ?? ""}
               onChange={(event) => {
-                table
-                  .getColumn("lifecycleStage")
-                  ?.setFilterValue(event.target.value);
-                onFilterChange?.(event.target.value);
+                const value = event.target.value;
+                table.getColumn("firstName")?.setFilterValue(value);
+                table.getColumn("lastName")?.setFilterValue(value);
               }}
               className="h-8"
             />
