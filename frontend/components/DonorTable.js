@@ -38,6 +38,16 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import { Plus } from "lucide-react";
 
 export default function DonorTable({
   data,
@@ -188,50 +198,107 @@ export default function DonorTable({
       },
     },
     {
-      accessorKey: "notes",
-      header: "Notes",
-      cell: ({ row }) => {
-        const notes = row.getValue("notes");
-        return (
-          <div className="text-sm text-muted-foreground">
-            {notes || "No notes"}
-          </div>
-        );
-      },
-    },
-    {
       accessorKey: "comments",
       header: "Comments",
-      cell: ({ row }) => {
-        const [isUpdating, setIsUpdating] = useState(false); // 控制更新状态
-        const donorId = row.original.id; // 当前行的捐赠者 ID
-        const comments = row.original.comments || []; // 获取所有评论
+      cell: function CommentCell({ row }) {
+        const [isOpen, setIsOpen] = useState(false);
+        const [newComment, setNewComment] = useState("");
+        const donorId = row.original.id;
+        const comments = row.original.comments || [];
         const latestComment =
-          comments.length > 0 ? comments[comments.length - 1].content : ""; // 获取最新评论
-        console.log(comments);
-        console.log(latestComment);
+          comments.length > 0 ? comments[comments.length - 1].content : "";
 
         return (
-          <div className="relative">
-            {/* 展示最新的评论 */}
-            <Input
-              type="text"
-              defaultValue={latestComment} // 默认值为最新评论
-              placeholder="Add new comment..."
-              className="h-8 w-full border-none bg-muted/30 px-2 py-1 text-sm"
-              disabled={isUpdating} // 如果正在更新，禁用输入框
-              onBlur={async (e) => {
-                const newComment = e.target.value.trim(); // 获取用户输入
-                if (newComment && newComment !== latestComment) {
-                  setIsUpdating(true); // 开始更新状态
-                  await onCommentChange(donorId, newComment); // 调用更新接口
-                  setIsUpdating(false); // 取消更新状态
-                }
-              }}
-            />
-            {isUpdating && (
-              <Loader2 className="absolute right-2 top-2 h-4 w-4 animate-spin" />
+          <div className="relative flex items-center gap-2">
+            {latestComment ? (
+              <>
+                <span
+                  className="text-sm truncate max-w-[120px]"
+                  title={latestComment}
+                >
+                  {latestComment}
+                </span>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-6 w-6"
+                  onClick={() => setIsOpen(true)}
+                >
+                  <Plus className="h-4 w-4" />
+                </Button>
+              </>
+            ) : (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setIsOpen(true)}
+                className="text-xs"
+              >
+                Add comment
+              </Button>
             )}
+
+            <Dialog open={isOpen} onOpenChange={setIsOpen}>
+              <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                  <DialogTitle>Donor Comments</DialogTitle>
+                </DialogHeader>
+
+                <div className="grid gap-4 py-4">
+                  <div className="grid gap-2">
+                    <Textarea
+                      value={newComment}
+                      onChange={(e) => setNewComment(e.target.value)}
+                      placeholder="Add new comment..."
+                      className="min-h-[100px]"
+                    />
+                  </div>
+
+                  {comments.length > 0 && (
+                    <div className="grid gap-2">
+                      <h4 className="text-sm font-medium">Previous Comments</h4>
+                      <div className="max-h-[200px] overflow-y-auto space-y-2">
+                        {comments.map((comment, index) => (
+                          <div
+                            key={index}
+                            className="text-sm p-2 rounded bg-muted/50 space-y-1"
+                          >
+                            <p>{comment.content}</p>
+                            <p className="text-xs text-muted-foreground">
+                              {new Date(comment.createdAt).toLocaleString()}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="flex justify-end gap-3 mt-4">
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        setIsOpen(false);
+                        setNewComment("");
+                      }}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      onClick={async () => {
+                        if (newComment.trim()) {
+                          await onCommentChange(donorId, newComment.trim());
+                          setNewComment("");
+                          setIsOpen(false);
+                        }
+                      }}
+                      disabled={!newComment.trim()}
+                    >
+                      Save Comment
+                    </Button>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
           </div>
         );
       },
