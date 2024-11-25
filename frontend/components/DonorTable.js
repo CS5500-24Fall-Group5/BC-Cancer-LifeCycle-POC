@@ -161,23 +161,23 @@ export default function DonorTable({
             <Badge
               variant="outline"
               className={`
-                ${
-                  stage === "ACTIVE" &&
-                  "border-emerald-500 bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300"
-                }
-                ${
-                  stage === "LAPSED" &&
-                  "border-red-500 bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-300"
-                }
-                ${
-                  stage === "AT_RISK" &&
-                  "border-amber-500 bg-amber-50 text-amber-700 dark:bg-amber-950 dark:text-amber-300"
-                }
-                ${
-                  stage === "NEW" &&
-                  "border-blue-500 bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300"
-                }
-              `}
+              ${
+                stage === "ACTIVE" &&
+                "border-emerald-500 bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300"
+              }
+              ${
+                stage === "LAPSED" &&
+                "border-red-500 bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-300"
+              }
+              ${
+                stage === "AT_RISK" &&
+                "border-amber-500 bg-amber-50 text-amber-700 dark:bg-amber-950 dark:text-amber-300"
+              }
+              ${
+                stage === "NEW" &&
+                "border-blue-500 bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300"
+              }
+            `}
             >
               {stage}
             </Badge>
@@ -190,20 +190,53 @@ export default function DonorTable({
     {
       accessorKey: "notes",
       header: "Notes",
-      cell: ({ row }) => (
-        <Input
-          type="text"
-          defaultValue={row.getValue("notes")}
-          placeholder="Add note..."
-          className="h-8 w-[180px] border-none bg-muted/30 px-2 py-1 text-sm"
-          onBlur={(e) => {
-            if (onCommentChange) {
-              onCommentChange(row.original.id, e.target.value);
-            }
-          }}
-        />
-      ),
+      cell: ({ row }) => {
+        const notes = row.getValue("notes");
+        return (
+          <div className="text-sm text-muted-foreground">
+            {notes || "No notes"}
+          </div>
+        );
+      },
     },
+    {
+      accessorKey: "comments",
+      header: "Comments",
+      cell: ({ row }) => {
+        const [isUpdating, setIsUpdating] = useState(false); // 控制更新状态
+        const donorId = row.original.id; // 当前行的捐赠者 ID
+        const comments = row.original.comments || []; // 获取所有评论
+        const latestComment =
+          comments.length > 0 ? comments[comments.length - 1].content : ""; // 获取最新评论
+        console.log(comments);
+        console.log(latestComment);
+
+        return (
+          <div className="relative">
+            {/* 展示最新的评论 */}
+            <Input
+              type="text"
+              defaultValue={latestComment} // 默认值为最新评论
+              placeholder="Add new comment..."
+              className="h-8 w-full border-none bg-muted/30 px-2 py-1 text-sm"
+              disabled={isUpdating} // 如果正在更新，禁用输入框
+              onBlur={async (e) => {
+                const newComment = e.target.value.trim(); // 获取用户输入
+                if (newComment && newComment !== latestComment) {
+                  setIsUpdating(true); // 开始更新状态
+                  await onCommentChange(donorId, newComment); // 调用更新接口
+                  setIsUpdating(false); // 取消更新状态
+                }
+              }}
+            />
+            {isUpdating && (
+              <Loader2 className="absolute right-2 top-2 h-4 w-4 animate-spin" />
+            )}
+          </div>
+        );
+      },
+    },
+
     {
       id: "actions",
       cell: ({ row }) => {

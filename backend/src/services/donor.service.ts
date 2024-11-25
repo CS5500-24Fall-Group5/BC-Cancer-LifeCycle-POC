@@ -23,11 +23,18 @@ export class DonorService {
       orderBy: {
         updatedAt: "desc",
       },
+      include: {
+        comments: {
+          orderBy: {
+            createdAt: "asc",
+          },
+        },
+      },
     };
 
     // Add filtering conditions if provided
     if (params?.stage || params?.searchTerm) {
-      queryArgs.where = {};
+      queryArgs.where = queryArgs.where || {};
 
       if (params?.stage) {
         queryArgs.where.lifecycleStage = params.stage;
@@ -82,7 +89,6 @@ export class DonorService {
   }) {
     const { donorId, content, createdBy } = params;
 
-    // Verify donor exists before adding comment
     const donor = await this.prisma.donor.findUnique({
       where: { id: donorId },
     });
@@ -91,13 +97,19 @@ export class DonorService {
       throw new Error("Donor not found");
     }
 
-    return this.prisma.comment.create({
-      data: {
-        donorId,
-        content,
-        createdBy,
-      },
-    });
+    return this.prisma.$transaction([
+      this.prisma.comment.create({
+        data: {
+          donorId,
+          content,
+          createdBy,
+        },
+      }),
+      this.prisma.donor.update({
+        where: { id: donorId },
+        data: { updatedAt: new Date() },
+      }),
+    ]);
   }
 
   async checkInitialData() {
