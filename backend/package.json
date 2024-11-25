@@ -1,0 +1,23 @@
+{
+  "name": "backend",
+  "module": "index.ts",
+  "type": "module",
+  "scripts": {
+    "dev": "bun --watch src/index.ts",
+    "start": "bun src/index.ts"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@types/node": "^22.9.3",
+    "prisma": "^5.22.0"
+  },
+  "peerDependencies": {
+    "typescript": "^5.7.2"
+  },
+  "dependencies": {
+    "@hono/zod-validator": "^0.4.1",
+    "@prisma/client": "^5.22.0",
+    "hono": "^4.6.12",
+    "zod": "^3.23.8"
+  }
+}

@@ -1,0 +1,69 @@
+// schema.prisma
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum LifecycleStage {
+  NEW
+  ACTIVE
+  AT_RISK
+  LAPSED
+}
+
+model Donor {
+  id             String         @id @default(uuid())
+  firstName      String
+  lastName       String
+  city           String?
+  totalDonations Float // Total donation amount
+  lastGiftAmount Float // Last gift amount
+  lastGiftDate   DateTime // Last gift date
+  lifecycleStage LifecycleStage
+  notes          String? // Notes about the donor
+
+  // Extended fields
+  firstGiftDate           DateTime? // First gift date
+  totalGiftsLastFiscal    Float? // Total gifts from last fiscal year
+  totalGiftsCurrentFiscal Float? // Total gifts from current fiscal year
+
+  // Relations
+  comments Comment[]
+  actions  DonorAction[]
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([lifecycleStage])
+}
+
+model Comment {
+  id        String   @id @default(uuid())
+  content   String   @db.Text
+  donor     Donor    @relation(fields: [donorId], references: [id])
+  donorId   String
+  createdBy String
+  createdAt DateTime @default(now())
+
+  @@index([donorId])
+}
+
+model DonorAction {
+  id            String         @id @default(uuid())
+  donor         Donor          @relation(fields: [donorId], references: [id])
+  donorId       String
+  previousStage LifecycleStage
+  newStage      LifecycleStage
+  actionType    String // MANUAL_UPDATE, AUTO_UPDATE, etc.
+  note          String?        @db.Text
+  createdBy     String
+  createdAt     DateTime       @default(now())
+
+  @@index([donorId])
+}
