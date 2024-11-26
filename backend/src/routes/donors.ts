@@ -45,7 +45,10 @@ app.put("/:id/lifecycle-stage", async (c) => {
   }
 
   try {
-    const updatedDonor = await donorService.updateLifecycleStage(id, lifecycleStage);
+    const updatedDonor = await donorService.updateLifecycleStage(
+      id,
+      lifecycleStage
+    );
     return c.json(updatedDonor);
   } catch (error) {
     console.error("Error updating lifecycle stage:", error);
@@ -53,5 +56,14 @@ app.put("/:id/lifecycle-stage", async (c) => {
   }
 });
 
+app.get("/stats", async (c) => {
+  try {
+    const stats = await donorService.getDonorStats();
+    return c.json(stats);
+  } catch (error) {
+    console.error("Error fetching donor stats:", error);
+    return c.json({ error: "Failed to fetch donor statistics" }, 500);
+  }
+});
 
 export default app;

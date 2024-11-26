@@ -136,4 +136,68 @@ export class DonorService {
       data: { lifecycleStage, updatedAt: new Date() },
     });
   }
+
+  async getDonorStats() {
+    // 获取所有状态的数量
+    const stats = await this.prisma.donor.groupBy({
+      by: ["lifecycleStage"],
+      _count: {
+        id: true,
+      },
+    });
+
+    // 获取总捐赠者数量
+    const totalDonors = await this.prisma.donor.count();
+
+    // 获取每个状态的总捐赠金额
+    const donationsByStage = await this.prisma.donor.groupBy({
+      by: ["lifecycleStage"],
+      _sum: {
+        totalDonations: true,
+      },
+    });
+
+    // 构建响应数据
+    const statsMap = new Map(stats.map((s) => [s.lifecycleStage, s._count.id]));
+    const donationsMap = new Map(
+      donationsByStage.map((d) => [
+        d.lifecycleStage,
+        d._sum.totalDonations || 0,
+      ])
+    );
+
+    return {
+      total: totalDonors,
+      stats: {
+        NEW: {
+          count: statsMap.get("NEW") || 0,
+          totalDonations: donationsMap.get("NEW") || 0,
+          percentage: totalDonors
+            ? (((statsMap.get("NEW") || 0) / totalDonors) * 100).toFixed(1)
+            : 0,
+        },
+        ACTIVE: {
+          count: statsMap.get("ACTIVE") || 0,
+          totalDonations: donationsMap.get("ACTIVE") || 0,
+          percentage: totalDonors
+            ? (((statsMap.get("ACTIVE") || 0) / totalDonors) * 100).toFixed(1)
+            : 0,
+        },
+        AT_RISK: {
+          count: statsMap.get("AT_RISK") || 0,
+          totalDonations: donationsMap.get("AT_RISK") || 0,
+          percentage: totalDonors
+            ? (((statsMap.get("AT_RISK") || 0) / totalDonors) * 100).toFixed(1)
+            : 0,
+        },
+        LAPSED: {
+          count: statsMap.get("LAPSED") || 0,
+          totalDonations: donationsMap.get("LAPSED") || 0,
+          percentage: totalDonors
+            ? (((statsMap.get("LAPSED") || 0) / totalDonors) * 100).toFixed(1)
+            : 0,
+        },
+      },
+    };
+  }
 }
