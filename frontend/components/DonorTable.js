@@ -678,7 +678,7 @@ export default function DonorTable({
           </div>
 
           {/* Action Button */}
-          {selectedLifecycleStage && (
+          {selectedLifecycleStage && selectedLifecycleStage != "ALL" && (
             <Button
               variant="solid"
               size="sm"
