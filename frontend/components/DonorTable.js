@@ -542,7 +542,7 @@ export default function DonorTable({
   };
 
   return (
-    <Card>
+    <Card className="mb-6">
       <CardHeader>
         <CardTitle>Donor Management</CardTitle>
       </CardHeader>

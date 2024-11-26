@@ -169,7 +169,7 @@ export function DonorStats() {
         totalDonations={stats.stats.ACTIVE.totalDonations}
         icon={Users}
         percentage={stats.stats.ACTIVE.percentage}
-        trend={2.5} // 这里可以从API获取真实数据
+        trend={2.5}
       />
       <StatCard
         title="New Donors"
