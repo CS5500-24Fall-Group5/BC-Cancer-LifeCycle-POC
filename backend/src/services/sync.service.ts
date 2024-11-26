@@ -5,8 +5,7 @@ import { DonorService } from "./donor.service";
 import { calculateLifecycleStage } from "../utils/lifecycle";
 
 export class SyncService {
-  private readonly FAUX_API_URL =
-    "https://bc-cancer-donor-lifecycle-faux-data.onrender.com/donors";
+  private readonly FAUX_API_URL = process.env.FAUX_API_URL || "";
 
   constructor(
     private prisma: PrismaClient,
