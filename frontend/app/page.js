@@ -126,6 +126,11 @@ export default function Home() {
       stage: currentFilter.stage,
       searchTerm: currentFilter.searchTerm,
     });
+
+    const donorTableElement = document.getElementById("donor-table");
+    if (donorTableElement) {
+      donorTableElement.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
   };
 
   const handleFilterChange = (stage) => {
@@ -173,16 +178,18 @@ export default function Home() {
 
       <DonorStats />
       <DonorTasks />
-      <DonorTable
-        data={donors}
-        isLoading={isLoading}
-        pagination={pagination}
-        currentFilter={currentFilter}
-        onCommentChange={handleCommentChange}
-        onPageChange={handlePageChange}
-        onFilterChange={handleFilterChange}
-        onSearchChange={handleSearchChange}
-      />
+      <div id="donor-table" className="min-h-[500px]">
+        <DonorTable
+          data={donors}
+          isLoading={isLoading}
+          pagination={pagination}
+          currentFilter={currentFilter}
+          onCommentChange={handleCommentChange}
+          onPageChange={handlePageChange}
+          onFilterChange={handleFilterChange}
+          onSearchChange={handleSearchChange}
+        />
+      </div>
 
       <Toaster />
     </div>
