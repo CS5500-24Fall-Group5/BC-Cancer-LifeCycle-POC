@@ -4,7 +4,7 @@
 
 > **[LIVE DEMO](https://bc-cancer-life-cycle-poc.vercel.app/)**
 
-> ![Demo Preview in Gif](https://imgur.com/a/LYidlZ6)
+> [Demo Preview in GIF](https://imgur.com/a/LYidlZ6)
 
 A proof-of-concept dashboard for managing donor lifecycles, tasks, and engagement. Includes automated categorization and easy-to-use management tools.
 
