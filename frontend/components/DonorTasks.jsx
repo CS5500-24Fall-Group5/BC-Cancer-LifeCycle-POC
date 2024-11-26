@@ -78,7 +78,9 @@ export function DonorTasks() {
   const fetchTasks = async () => {
     try {
       setIsLoading(true);
-      const response = await fetch("http://localhost:3000/api/tasks");
+      const response = await fetch(
+        "https://bc-cancer-lifecycle-poc.onrender.com/api/tasks"
+      );
       if (!response.ok) throw new Error("Failed to fetch tasks");
       const { data } = await response.json();
       setTasks(data);
@@ -96,11 +98,14 @@ export function DonorTasks() {
 
   const handleCreateTask = async (values) => {
     try {
-      const response = await fetch("http://localhost:3000/api/tasks", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(values),
-      });
+      const response = await fetch(
+        "https://bc-cancer-lifecycle-poc.onrender.com/api/tasks",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(values),
+        }
+      );
 
       if (!response.ok) throw new Error("Failed to create task");
       await fetchTasks();
@@ -114,7 +119,7 @@ export function DonorTasks() {
   const handleUpdateStatus = async (taskId, newStatus) => {
     try {
       const response = await fetch(
-        `http://localhost:3000/api/tasks/${taskId}/status`,
+        `https://bc-cancer-lifecycle-poc.onrender.com/api/tasks/${taskId}/status`,
         {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
@@ -135,7 +140,7 @@ export function DonorTasks() {
 
     try {
       const response = await fetch(
-        `http://localhost:3000/api/tasks/${deleteTaskId}`,
+        `https://bc-cancer-lifecycle-poc.onrender.com/api/tasks/${deleteTaskId}`,
         {
           method: "DELETE",
         }

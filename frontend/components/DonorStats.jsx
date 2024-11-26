@@ -137,7 +137,9 @@ export function DonorStats() {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const response = await fetch("http://localhost:3000/api/donors/stats");
+        const response = await fetch(
+          "https://bc-cancer-lifecycle-poc.onrender.com/api/donors/stats"
+        );
         if (!response.ok) throw new Error("Failed to fetch stats");
         const data = await response.json();
         setStats(data);

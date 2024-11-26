@@ -42,7 +42,7 @@ export default function Home() {
       }
 
       const response = await fetch(
-        `http://localhost:3000/api/donors?${queryParams}`
+        `https://bc-cancer-lifecycle-poc.onrender.com/api/donors?${queryParams}`
       );
 
       if (!response.ok) throw new Error("Failed to fetch donors");
@@ -71,9 +71,12 @@ export default function Home() {
   const syncData = async () => {
     try {
       setIsSyncing(true);
-      const response = await fetch("http://localhost:3000/api/sync", {
-        method: "POST",
-      });
+      const response = await fetch(
+        "https://bc-cancer-lifecycle-poc.onrender.com/api/sync",
+        {
+          method: "POST",
+        }
+      );
 
       if (!response.ok) throw new Error("Sync failed");
 
@@ -99,7 +102,7 @@ export default function Home() {
   const handleCommentChange = async (donorId, content) => {
     try {
       const response = await fetch(
-        `http://localhost:3000/api/donors/${donorId}/comments`,
+        `https://bc-cancer-lifecycle-poc.onrender.com/api/donors/${donorId}/comments`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

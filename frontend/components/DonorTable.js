@@ -461,7 +461,7 @@ export default function DonorTable({
                       setIsSaving(true);
                       try {
                         const response = await fetch(
-                          `http://localhost:3000/api/donors/${donor.id}/lifecycle-stage`,
+                          `https://bc-cancer-lifecycle-poc.onrender.com/api/donors/${donor.id}/lifecycle-stage`,
                           {
                             method: "PUT",
                             headers: {
