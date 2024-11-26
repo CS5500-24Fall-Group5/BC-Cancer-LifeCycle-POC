@@ -5,6 +5,7 @@ import { logger } from "hono/logger";
 import { prettyJSON } from "hono/pretty-json";
 import donorRoutes from "./routes/donors";
 import syncRoutes from "./routes/sync";
+import taskRoutes from "./routes/tasks";
 import { PrismaClient } from "@prisma/client";
 import { DonorService } from "./services/donor.service";
 import { SyncService } from "./services/sync.service";
@@ -44,6 +45,7 @@ app.use("*", errorHandler());
 // Routes
 app.route("/api/donors", donorRoutes);
 app.route("/api/sync", syncRoutes);
+app.route("/api/tasks", taskRoutes);
 
 // Health check
 app.get("/health", (c) =>
