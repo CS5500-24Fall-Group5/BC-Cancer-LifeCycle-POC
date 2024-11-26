@@ -70,11 +70,15 @@ export default function DonorTable({
   onCommentChange,
   onPageChange,
   onFilterChange,
+  currentFilter,
+  onSearchChange,
 }) {
   const [sorting, setSorting] = useState([]);
   const [columnFilters, setColumnFilters] = useState([]);
   const [columnVisibility, setColumnVisibility] = useState({});
-  const [selectedLifecycleStage, setSelectedLifecycleStage] = useState("");
+  const [selectedLifecycleStage, setSelectedLifecycleStage] = useState(
+    currentFilter.stage || "ALL"
+  );
 
   const columns = [
     {
@@ -474,7 +478,7 @@ export default function DonorTable({
                         console.error("Error updating lifecycle stage:", error);
                       } finally {
                         // refresh the page
-                        onFilterChange();
+                        onFilterChange(onFilterChange(currentFilter.stage));
                         setIsSaving(false);
                       }
                     }}
@@ -552,6 +556,7 @@ export default function DonorTable({
               onChange={(event) => {
                 const value = event.target.value;
                 table.getColumn("firstName")?.setFilterValue(value);
+                onSearchChange?.(value);
               }}
               className="h-8"
             />
@@ -563,7 +568,7 @@ export default function DonorTable({
               value={selectedLifecycleStage}
               onValueChange={(value) => {
                 setSelectedLifecycleStage(value);
-                onFilterChange(value === "ALL" ? "" : value); // Pass empty string to parent if ALL is selected
+                onFilterChange(value === "ALL" ? "" : value);
               }}
             >
               <SelectTrigger className="w-full h-8">

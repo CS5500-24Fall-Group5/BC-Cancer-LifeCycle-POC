@@ -10,6 +10,10 @@ export default function Home() {
   const [donors, setDonors] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSyncing, setIsSyncing] = useState(false);
+  const [currentFilter, setCurrentFilter] = useState({
+    stage: "",
+    searchTerm: "",
+  });
   const [pagination, setPagination] = useState({
     page: 1,
     limit: 10,
@@ -17,16 +21,23 @@ export default function Home() {
     totalPages: 0,
   });
 
-  // Fetch donors from API
   const fetchDonors = async (params = {}) => {
     try {
       setIsLoading(true);
       const queryParams = new URLSearchParams({
         page: String(params.page || pagination.page),
         limit: String(params.limit || pagination.limit),
-        ...(params.stage && { stage: params.stage }),
-        ...(params.searchTerm && { searchTerm: params.searchTerm }),
+        stage: params.stage !== undefined ? params.stage : currentFilter.stage,
+        searchTerm:
+          params.searchTerm !== undefined
+            ? params.searchTerm
+            : currentFilter.searchTerm,
       });
+
+      // Clean up empty params
+      for (const [key, value] of queryParams.entries()) {
+        if (!value) queryParams.delete(key);
+      }
 
       const response = await fetch(
         `http://localhost:3000/api/donors?${queryParams}`
@@ -37,6 +48,16 @@ export default function Home() {
       const result = await response.json();
       setDonors(result.data);
       setPagination(result.pagination);
+
+      // Update current filter state with new params
+      setCurrentFilter((prevFilter) => ({
+        ...prevFilter,
+        stage: params.stage !== undefined ? params.stage : prevFilter.stage,
+        searchTerm:
+          params.searchTerm !== undefined
+            ? params.searchTerm
+            : prevFilter.searchTerm,
+      }));
     } catch (error) {
       console.error("Error fetching donors:", error);
       toast.error("Failed to load donors");
@@ -45,7 +66,6 @@ export default function Home() {
     }
   };
 
-  // Sync data with faux API
   const syncData = async () => {
     try {
       setIsSyncing(true);
@@ -58,7 +78,11 @@ export default function Home() {
       const result = await response.json();
       if (result.success) {
         toast.success(`Synced ${result.results.processed} donors`);
-        fetchDonors(); // Refresh data after sync
+        fetchDonors({
+          page: 1,
+          stage: currentFilter.stage,
+          searchTerm: currentFilter.searchTerm,
+        });
       } else {
         throw new Error(result.error || "Sync failed");
       }
@@ -70,7 +94,6 @@ export default function Home() {
     }
   };
 
-  // Handle comment updates
   const handleCommentChange = async (donorId, content) => {
     try {
       const response = await fetch(
@@ -84,11 +107,39 @@ export default function Home() {
 
       if (!response.ok) throw new Error("Failed to update comment");
       toast.success("Comment updated");
-      fetchDonors(); // Refresh to show new comment
+      fetchDonors({
+        page: pagination.page,
+        stage: currentFilter.stage,
+        searchTerm: currentFilter.searchTerm,
+      });
     } catch (error) {
       console.error("Error updating comment:", error);
       toast.error("Failed to update comment");
     }
+  };
+
+  const handlePageChange = (page) => {
+    fetchDonors({
+      page,
+      stage: currentFilter.stage,
+      searchTerm: currentFilter.searchTerm,
+    });
+  };
+
+  const handleFilterChange = (stage) => {
+    fetchDonors({
+      page: 1,
+      stage,
+      searchTerm: currentFilter.searchTerm,
+    });
+  };
+
+  const handleSearchChange = (searchTerm) => {
+    fetchDonors({
+      page: 1,
+      stage: currentFilter.stage,
+      searchTerm,
+    });
   };
 
   useEffect(() => {
@@ -122,9 +173,11 @@ export default function Home() {
         data={donors}
         isLoading={isLoading}
         pagination={pagination}
+        currentFilter={currentFilter}
         onCommentChange={handleCommentChange}
-        onPageChange={(page) => fetchDonors({ page })}
-        onFilterChange={(stage) => fetchDonors({ stage })}
+        onPageChange={handlePageChange}
+        onFilterChange={handleFilterChange}
+        onSearchChange={handleSearchChange}
       />
 
       <Toaster />
