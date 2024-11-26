@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { RefreshCcw, Loader2 } from "lucide-react";
 import { Toaster, toast } from "sonner";
 import { DonorStats } from "@/components/DonorStats";
+import { DonorTasks } from "@/components/DonorTasks";
 
 export default function Home() {
   const [donors, setDonors] = useState([]);
@@ -181,6 +182,7 @@ export default function Home() {
         onFilterChange={handleFilterChange}
         onSearchChange={handleSearchChange}
       />
+      <DonorTasks />
 
       <Toaster />
     </div>
