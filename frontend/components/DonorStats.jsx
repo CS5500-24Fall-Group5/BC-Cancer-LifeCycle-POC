@@ -133,13 +133,12 @@ const SkeletonCard = () => {
 export function DonorStats() {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const response = await fetch(
-          "https://bc-cancer-lifecycle-poc.onrender.com/api/donors/stats"
-        );
+        const response = await fetch(`${API_BASE_URL}/api/donors/stats`);
         if (!response.ok) throw new Error("Failed to fetch stats");
         const data = await response.json();
         setStats(data);

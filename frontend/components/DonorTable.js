@@ -79,6 +79,7 @@ export default function DonorTable({
   const [selectedLifecycleStage, setSelectedLifecycleStage] = useState(
     currentFilter.stage || "ALL"
   );
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
   const columns = [
     {
@@ -461,7 +462,7 @@ export default function DonorTable({
                       setIsSaving(true);
                       try {
                         const response = await fetch(
-                          `https://bc-cancer-lifecycle-poc.onrender.com/api/donors/${donor.id}/lifecycle-stage`,
+                          `${API_BASE_URL}/api/donors/${donor.id}/lifecycle-stage`,
                           {
                             method: "PUT",
                             headers: {
