@@ -138,7 +138,6 @@ export class DonorService {
   }
 
   async getDonorStats() {
-    // 获取所有状态的数量
     const stats = await this.prisma.donor.groupBy({
       by: ["lifecycleStage"],
       _count: {
@@ -146,10 +145,8 @@ export class DonorService {
       },
     });
 
-    // 获取总捐赠者数量
     const totalDonors = await this.prisma.donor.count();
 
-    // 获取每个状态的总捐赠金额
     const donationsByStage = await this.prisma.donor.groupBy({
       by: ["lifecycleStage"],
       _sum: {
@@ -157,7 +154,6 @@ export class DonorService {
       },
     });
 
-    // 构建响应数据
     const statsMap = new Map(stats.map((s) => [s.lifecycleStage, s._count.id]));
     const donationsMap = new Map(
       donationsByStage.map((d) => [

@@ -37,8 +37,8 @@ export function calculateLifecycleStage(data: {
     return "NEW";
   }
 
-  // Lapsed donor: no gift in over 2 years (730 days)
-  if (daysSinceLastGift > 730) {
+  // Lapsed donor: no gift in over 1.5 year
+  if (daysSinceLastGift > 548) {
     return "LAPSED";
   }
 
