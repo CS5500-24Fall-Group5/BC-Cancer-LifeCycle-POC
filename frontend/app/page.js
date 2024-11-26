@@ -5,6 +5,7 @@ import DonorTable from "@/components/DonorTable";
 import { Button } from "@/components/ui/button";
 import { RefreshCcw, Loader2 } from "lucide-react";
 import { Toaster, toast } from "sonner";
+import { DonorStats } from "@/components/DonorStats";
 
 export default function Home() {
   const [donors, setDonors] = useState([]);
@@ -169,6 +170,7 @@ export default function Home() {
         </Button>
       </div>
 
+      <DonorStats />
       <DonorTable
         data={donors}
         isLoading={isLoading}
