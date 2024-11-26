@@ -172,6 +172,7 @@ export default function Home() {
       </div>
 
       <DonorStats />
+      <DonorTasks />
       <DonorTable
         data={donors}
         isLoading={isLoading}
@@ -182,7 +183,6 @@ export default function Home() {
         onFilterChange={handleFilterChange}
         onSearchChange={handleSearchChange}
       />
-      <DonorTasks />
 
       <Toaster />
     </div>

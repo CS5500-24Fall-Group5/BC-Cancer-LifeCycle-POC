@@ -160,7 +160,7 @@ export function DonorTasks() {
   });
 
   return (
-    <Card className="col-span-3">
+    <Card className="col-span-3 mb-6">
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>
@@ -205,6 +205,7 @@ export function DonorTasks() {
                 <TableHead>Type</TableHead>
                 <TableHead>Target Group</TableHead>
                 <TableHead>Affected Donors</TableHead>
+                <TableHead>Description</TableHead>
                 <TableHead>Priority</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead className="w-[50px]"></TableHead>
@@ -226,6 +227,9 @@ export function DonorTasks() {
                     <Badge variant="outline">{task.targetGroup}</Badge>
                   </TableCell>
                   <TableCell>{task.affectedDonors}</TableCell>
+                  <TableCell>
+                    <span className="text-sm">{task.description}</span>
+                  </TableCell>
                   <TableCell>
                     <Badge variant="default">{task.priority}</Badge>
                   </TableCell>
