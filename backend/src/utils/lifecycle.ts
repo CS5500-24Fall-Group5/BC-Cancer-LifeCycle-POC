@@ -32,24 +32,28 @@ export function calculateLifecycleStage(data: {
     (now - firstGiftTimestamp) / (1000 * 60 * 60 * 24)
   );
 
-  // New donor: first gift within 90 days
-  if (daysSinceFirstGift <= 90) {
+  // New donor: first gift within 180 days
+  if (daysSinceFirstGift <= 180) {
     return "NEW";
   }
 
-  // Lapsed donor: no gift in over 1.5 year
-  if (daysSinceLastGift > 548) {
+  // Lapsed donor: no gift in over 4 years
+  if (daysSinceLastGift > 1460) {
     return "LAPSED";
   }
 
-  // At-risk donor conditions:
-  // - No gift in over a year
-  // - OR current fiscal year donations significantly decreased (below 50% of last year)
-  if (
-    daysSinceLastGift > 365 ||
-    (data.totalGiftsCurrentFiscal < data.totalGiftsLastFiscal * 0.5 &&
-      daysSinceLastGift > 180) // Added time condition to avoid early fiscal year false positives
-  ) {
+  // Evaluate risk based on multiple criteria
+  const isAtRisk =
+    // No gifts for over 18 months
+    daysSinceLastGift > 540 ||
+    // Or no gifts for over 1 year with significant decrease in current fiscal year
+    (daysSinceLastGift > 365 &&
+      data.totalGiftsCurrentFiscal < data.totalGiftsLastFiscal * 0.6) ||
+    // Or major decrease in donation amount (below 40% of last fiscal year)
+    (data.totalGiftsCurrentFiscal < data.totalGiftsLastFiscal * 0.4 &&
+      daysSinceLastGift > 180);
+
+  if (isAtRisk) {
     return "AT_RISK";
   }
 
