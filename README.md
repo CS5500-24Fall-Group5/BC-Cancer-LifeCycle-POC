@@ -2,7 +2,7 @@
 
 ![landing](assets/landing.png)
 
-> **[LIVE DEMO](https://bc-cancer-life-cycle-poc.vercel.app/)**
+> **[LIVE DEMO](https://bccancer.ansonhe.com)**
 
 > [Demo Preview in GIF](https://imgur.com/a/LYidlZ6)
 
