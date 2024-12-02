@@ -165,20 +165,20 @@ export function DonorStats() {
   return (
     <StatsGrid>
       <StatCard
-        title="Active Donors"
-        value={stats.stats.ACTIVE.count}
-        totalDonations={stats.stats.ACTIVE.totalDonations}
-        icon={Users}
-        percentage={stats.stats.ACTIVE.percentage}
-        trend={2.5}
-      />
-      <StatCard
         title="New Donors"
         value={stats.stats.NEW.count}
         totalDonations={stats.stats.NEW.totalDonations}
         icon={TrendingUp}
         percentage={stats.stats.NEW.percentage}
         trend={5.2}
+      />
+      <StatCard
+        title="Active Donors"
+        value={stats.stats.ACTIVE.count}
+        totalDonations={stats.stats.ACTIVE.totalDonations}
+        icon={Users}
+        percentage={stats.stats.ACTIVE.percentage}
+        trend={2.5}
       />
       <StatCard
         title="At Risk Donors"
