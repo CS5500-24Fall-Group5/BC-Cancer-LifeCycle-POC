@@ -59,6 +59,6 @@ The donor lifecycle stage is automatically determined based on the following cri
 ### Deploy
 
 - Frontend: `Vercel`
-- Backend: `Render`
+- Backend: `Self-hosted`
 
 ## LICENSE
